@@ -5,6 +5,7 @@
     "dotenv-flow": "^3.2.0"
   },
   "devDependencies": {
+    "@types/dotenv-flow": "^3.2.0",
     "@types/node": "^17.0.14"
   },
   "scripts": {

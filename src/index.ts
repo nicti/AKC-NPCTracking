@@ -1,7 +1,7 @@
 import * as fs from "fs"
 import axios from 'axios'
 import {config} from 'dotenv-flow'
-import {MessageBuilder, Webhook} from "discord-webhook-node";
+import {MessageBuilder, Webhook} from "discord-webhook-node"
 
 config()
 
@@ -18,21 +18,23 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     if (fs.existsSync('history.json')) {
         oldData = JSON.parse(fs.readFileSync('history.json').toString()) as []
     }
-    const systems = process.env.SYSTEM_IDS.split(',')
+    const systems = (process.env.SYSTEM_IDS as string).split(',')
 
     let data = []
     for (let i = 0; i < systems.length; i++) {
         const system = parseInt(systems[i])
         let oldSystemData: number = 0
         if (oldData) {
-            let tmp: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number } = oldData.find((e: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }) => e.system_id === system)
+            let tmp: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }|undefined = oldData.find((e: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }) => e.system_id === system)
             if (typeof tmp !== "undefined") {
+                // @ts-ignore prevented by typeof check
                 oldSystemData = tmp.npc_kills
             }
         }
-        let tmp: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number } = newData.find((e: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }) => e.system_id === system)
+        let tmp: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }|undefined = newData.find((e: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }) => e.system_id === system)
         let newSystemData = 0
         if (typeof tmp !== "undefined") {
+            // @ts-ignore prevented by typeof check
             newSystemData = tmp.npc_kills
         }
         const delta = (newSystemData - oldSystemData)
@@ -42,7 +44,7 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     fs.rmSync('history.json')
     fs.writeFileSync('history.json', JSON.stringify(response.data))
     fs.writeFileSync('.etag', response.headers.etag)
-    const hook = new Webhook(process.env.WEBHOOK)
+    const hook = new Webhook(process.env.WEBHOOK as string)
     const embed = new MessageBuilder()
         .setTitle('NPC Kill Report')
         .setTimestamp()
@@ -55,7 +57,7 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
 
     for (let i = 0; i < data.length; i++) {
         let dat = data[i]
-        embed.addField(idData.find((e) => e.id === dat.id).name, `${dat.npc_kills} (${dat.delta})`,true)
+        embed.addField(idData.find((e: any) => e.id === dat.id).name, `${dat.npc_kills} (${dat.delta})`,true)
     }
     hook.send(embed)
 }).catch(response => {
