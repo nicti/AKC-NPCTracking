@@ -118,7 +118,11 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 idData = (_a.sent()).data;
                 _loop_2 = function (i) {
                     var dat = data[i];
-                    embed.addField(idData.find(function (e) { return e.id === dat.id; }).name, dat.npc_kills + " (" + dat.delta + ")", true);
+                    var delta = dat.delta.toString();
+                    if (!delta.startsWith("-")) {
+                        delta = "+" + delta;
+                    }
+                    embed.addField(idData.find(function (e) { return e.id === dat.id; }).name, dat.npc_kills + " (" + delta + ")", true);
                 };
                 for (i = 0; i < data.length; i++) {
                     _loop_2(i);

@@ -9,6 +9,7 @@
     "@types/node": "^17.0.14"
   },
   "scripts": {
-    "debug": "ts-node --prefer-ts-exts src/index.ts"
+    "debug": "ts-node --prefer-ts-exts src/index.ts",
+    "start": "node src/index.js"
   }
 }

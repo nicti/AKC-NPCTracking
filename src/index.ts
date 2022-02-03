@@ -57,7 +57,11 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
 
     for (let i = 0; i < data.length; i++) {
         let dat = data[i]
-        embed.addField(idData.find((e: any) => e.id === dat.id).name, `${dat.npc_kills} (${dat.delta})`,true)
+        let delta = dat.delta.toString()
+        if (!delta.startsWith("-")) {
+            delta = `+${delta}`
+        }
+        embed.addField(idData.find((e: any) => e.id === dat.id).name, `${dat.npc_kills} (${delta})`,true)
     }
     hook.send(embed)
 }).catch(response => {
