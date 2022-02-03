@@ -1,0 +1,5 @@
+.etag
+history.json
+.idea
+node_modules
+*.local
