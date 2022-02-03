@@ -47,7 +47,7 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     const hook = new Webhook(process.env.WEBHOOK as string)
     const embed = new MessageBuilder()
         .setTitle('NPC Kill Report')
-        .setTimestamp()
+        .setFooter(response.headers["last-modified"])
     let ids = []
     for (let i = 0; i < data.length; i++) {
         let dat = data[i]

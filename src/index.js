@@ -107,7 +107,7 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 hook = new discord_webhook_node_1.Webhook(process.env.WEBHOOK);
                 embed = new discord_webhook_node_1.MessageBuilder()
                     .setTitle('NPC Kill Report')
-                    .setTimestamp();
+                    .setFooter(response.headers["last-modified"]);
                 ids = [];
                 for (i = 0; i < data.length; i++) {
                     dat = data[i];
