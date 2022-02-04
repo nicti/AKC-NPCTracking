@@ -55,14 +55,23 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     }
     let idData = (await axios.post('https://esi.evetech.net/v3/universe/names/',ids)).data
 
+    let text = '```diff'
     for (let i = 0; i < data.length; i++) {
         let dat = data[i]
         let delta = dat.delta.toString()
+        let prefix = '-'
         if (!delta.startsWith("-")) {
             delta = `+${delta}`
+            if (dat.delta == 0) {
+                prefix = ' '
+            } else {
+                prefix = '+'
+            }
         }
-        embed.addField(idData.find((e: any) => e.id === dat.id).name, `${dat.npc_kills} (${delta})`,true)
+        text = `${text}\n${prefix} ${(idData.find((e: any) => e.id === dat.id).name)} => ${dat.npc_kills.toString().padStart(4,' ')} (${delta.toString().padStart(4,' ')})`
     }
+    text = `${text}\`\`\``
+    embed.setDescription(text)
     hook.send(embed)
 }).catch(response => {
     if (response.status === 304) {

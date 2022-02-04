@@ -68,7 +68,7 @@ if (fs.existsSync('.etag')) {
     etag = fs.readFileSync('.etag').toString();
 }
 axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { headers: { 'If-None-Match': etag } }).then(function (response) { return __awaiter(void 0, void 0, void 0, function () {
-    var oldData, newData, systems, data, _loop_1, i, hook, embed, ids, i, dat, idData, _loop_2, i;
+    var oldData, newData, systems, data, _loop_1, i, hook, embed, ids, i, dat, idData, text, _loop_2, i;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -116,17 +116,27 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 return [4 /*yield*/, axios_1.default.post('https://esi.evetech.net/v3/universe/names/', ids)];
             case 1:
                 idData = (_a.sent()).data;
+                text = '```diff';
                 _loop_2 = function (i) {
                     var dat = data[i];
                     var delta = dat.delta.toString();
+                    var prefix = '-';
                     if (!delta.startsWith("-")) {
                         delta = "+" + delta;
+                        if (dat.delta == 0) {
+                            prefix = ' ';
+                        }
+                        else {
+                            prefix = '+';
+                        }
                     }
-                    embed.addField(idData.find(function (e) { return e.id === dat.id; }).name, dat.npc_kills + " (" + delta + ")", true);
+                    text = text + "\n" + prefix + " " + (idData.find(function (e) { return e.id === dat.id; }).name) + " => " + dat.npc_kills.toString().padStart(4, ' ') + " (" + delta.toString().padStart(4, ' ') + ")";
                 };
                 for (i = 0; i < data.length; i++) {
                     _loop_2(i);
                 }
+                text = text + "```";
+                embed.setDescription(text);
                 hook.send(embed);
                 return [2 /*return*/];
         }
