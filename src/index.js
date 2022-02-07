@@ -68,7 +68,7 @@ if (fs.existsSync('.etag')) {
     etag = fs.readFileSync('.etag').toString();
 }
 axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { headers: { 'If-None-Match': etag } }).then(function (response) { return __awaiter(void 0, void 0, void 0, function () {
-    var oldData, newData, systems, data, _loop_1, i, hook, embed, ids, i, dat, idData, text, _loop_2, i;
+    var oldData, newData, systems, data, _loop_1, i, hook, embed, ids, i, dat, limitedIds, i, idData, text, _loop_2, i, hookLimited, embedLimited, tmp, _loop_3, i;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -89,11 +89,11 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                             oldSystemData = tmp_1.npc_kills;
                         }
                     }
-                    var tmp = newData.find(function (e) { return e.system_id === system; });
+                    var tmp_2 = newData.find(function (e) { return e.system_id === system; });
                     var newSystemData = 0;
-                    if (typeof tmp !== "undefined") {
+                    if (typeof tmp_2 !== "undefined") {
                         // @ts-ignore prevented by typeof check
-                        newSystemData = tmp.npc_kills;
+                        newSystemData = tmp_2.npc_kills;
                     }
                     var delta = (newSystemData - oldSystemData);
                     data.push({ id: system, npc_kills: newSystemData, delta: delta });
@@ -106,13 +106,18 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 fs.writeFileSync('.etag', response.headers.etag);
                 hook = new discord_webhook_node_1.Webhook(process.env.WEBHOOK);
                 embed = new discord_webhook_node_1.MessageBuilder()
-                    .setTitle('NPC Kill Report')
+                    .setTitle('NPC Delta Report')
                     .setFooter(response.headers["last-modified"]);
                 ids = [];
                 for (i = 0; i < data.length; i++) {
                     dat = data[i];
                     ids.push(dat.id);
                 }
+                limitedIds = process.env.SYSTEM_IDS_LIMITED.split(',');
+                for (i = 0; i < limitedIds.length; i++) {
+                    ids.push(parseInt(limitedIds[i]));
+                }
+                ids = Array.from(new Set(ids));
                 return [4 /*yield*/, axios_1.default.post('https://esi.evetech.net/v3/universe/names/', ids)];
             case 1:
                 idData = (_a.sent()).data;
@@ -138,6 +143,22 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 text = text + "```";
                 embed.setDescription(text);
                 hook.send(embed);
+                hookLimited = new discord_webhook_node_1.Webhook(process.env.WEBHOOK_LIMITER);
+                embedLimited = new discord_webhook_node_1.MessageBuilder()
+                    .setTitle('NPC Kill Report')
+                    .setFooter(response.headers["last-modified"]);
+                tmp = newData.filter(function (e) { return limitedIds.includes(e.system_id.toString()) && e.npc_kills >= parseInt(process.env.LIMITER_LIMIT); });
+                text = "```";
+                _loop_3 = function (i) {
+                    var system = tmp[i];
+                    text = text + "\n " + (idData.find(function (e) { return e.id === system.system_id; }).name) + " => " + system.npc_kills.toString().padStart(4, ' ');
+                };
+                for (i = 0; i < tmp.length; i++) {
+                    _loop_3(i);
+                }
+                text = text + "```";
+                embedLimited.setDescription(text);
+                hookLimited.send(embedLimited);
                 return [2 /*return*/];
         }
     });
