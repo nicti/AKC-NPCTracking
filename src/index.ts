@@ -76,6 +76,7 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
         text = `${text}\n${prefix} ${(idData.find((e: any) => e.id === dat.id).name)} => ${dat.npc_kills.toString().padStart(4,' ')} (${delta.toString().padStart(4,' ')})`
     }
     text = `${text}\`\`\``
+    console.log(text.length)
     embed.setDescription(text)
     hook.send(embed)
 

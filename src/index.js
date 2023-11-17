@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -62,7 +66,7 @@ var fs = __importStar(require("fs"));
 var axios_1 = __importDefault(require("axios"));
 var dotenv_flow_1 = require("dotenv-flow");
 var discord_webhook_node_1 = require("discord-webhook-node");
-dotenv_flow_1.config();
+(0, dotenv_flow_1.config)();
 var etag = '';
 if (fs.existsSync('.etag')) {
     etag = fs.readFileSync('.etag').toString();
@@ -127,7 +131,7 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                     var delta = dat.delta.toString();
                     var prefix = '-';
                     if (!delta.startsWith("-")) {
-                        delta = "+" + delta;
+                        delta = "+".concat(delta);
                         if (dat.delta == 0) {
                             prefix = ' ';
                         }
@@ -135,12 +139,13 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                             prefix = '+';
                         }
                     }
-                    text = text + "\n" + prefix + " " + (idData.find(function (e) { return e.id === dat.id; }).name) + " => " + dat.npc_kills.toString().padStart(4, ' ') + " (" + delta.toString().padStart(4, ' ') + ")";
+                    text = "".concat(text, "\n").concat(prefix, " ").concat((idData.find(function (e) { return e.id === dat.id; }).name), " => ").concat(dat.npc_kills.toString().padStart(4, ' '), " (").concat(delta.toString().padStart(4, ' '), ")");
                 };
                 for (i = 0; i < data.length; i++) {
                     _loop_2(i);
                 }
-                text = text + "```";
+                text = "".concat(text, "```");
+                console.log(text.length);
                 embed.setDescription(text);
                 hook.send(embed);
                 hookLimited = new discord_webhook_node_1.Webhook(process.env.WEBHOOK_LIMITER);
@@ -151,12 +156,12 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 text = "```";
                 _loop_3 = function (i) {
                     var system = tmp[i];
-                    text = text + "\n " + (idData.find(function (e) { return e.id === system.system_id; }).name) + " => " + system.npc_kills.toString().padStart(4, ' ');
+                    text = "".concat(text, "\n ").concat((idData.find(function (e) { return e.id === system.system_id; }).name), " => ").concat(system.npc_kills.toString().padStart(4, ' '));
                 };
                 for (i = 0; i < tmp.length; i++) {
                     _loop_3(i);
                 }
-                text = text + "```";
+                text = "".concat(text, "```");
                 embedLimited.setDescription(text);
                 hookLimited.send(embedLimited);
                 return [2 /*return*/];
