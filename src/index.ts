@@ -72,14 +72,14 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     let text = '```diff'
     const data1Sorted = data.sort((a, b) => {
         if (a.delta < b.delta) {
-            return -1
-        } else if (a.delta > b.delta) {
             return 1
+        } else if (a.delta > b.delta) {
+            return -1
         }
         return 0
     })
     for (let i = 0; i < data1Sorted.length; i++) {
-        let dat = data[i]
+        let dat = data1Sorted[i]
         if (!deltaSystemIds.includes(dat.id)) continue;
         if (dat.delta <= 0) continue;
         let delta = dat.delta.toString()
@@ -111,14 +111,14 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     let text2 = '```diff'
     const data2Sorted = data.sort((a, b) => {
         if (a.delta < b.delta) {
-            return -1
-        } else if (a.delta > b.delta) {
             return 1
+        } else if (a.delta > b.delta) {
+            return -1
         }
         return 0
     })
     for (let i = 0; i < data2Sorted.length; i++) {
-        let dat = data[i]
+        let dat = data2Sorted[i]
         if (!deltaSystemIds.includes(dat.id)) continue;
         if (dat.delta <= 0) continue;
         let delta = dat.delta.toString()
@@ -150,9 +150,9 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     text = "```"
     tmp = tmp.sort((a, b) => {
         if (a.npc_kills < b.npc_kills) {
-            return -1
-        } else if (a.npc_kills > b.npc_kills) {
             return 1
+        } else if (a.npc_kills > b.npc_kills) {
+            return -1
         }
         return 0
     })

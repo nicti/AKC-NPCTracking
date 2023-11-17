@@ -133,15 +133,15 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 text = '```diff';
                 data1Sorted = data.sort(function (a, b) {
                     if (a.delta < b.delta) {
-                        return -1;
+                        return 1;
                     }
                     else if (a.delta > b.delta) {
-                        return 1;
+                        return -1;
                     }
                     return 0;
                 });
                 _loop_2 = function (i) {
-                    var dat = data[i];
+                    var dat = data1Sorted[i];
                     if (!deltaSystemIds.includes(dat.id))
                         return "continue";
                     if (dat.delta <= 0)
@@ -176,15 +176,15 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 text2 = '```diff';
                 data2Sorted = data.sort(function (a, b) {
                     if (a.delta < b.delta) {
-                        return -1;
+                        return 1;
                     }
                     else if (a.delta > b.delta) {
-                        return 1;
+                        return -1;
                     }
                     return 0;
                 });
                 _loop_3 = function (i) {
-                    var dat = data[i];
+                    var dat = data2Sorted[i];
                     if (!deltaSystemIds.includes(dat.id))
                         return "continue";
                     if (dat.delta <= 0)
@@ -219,10 +219,10 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 text = "```";
                 tmp = tmp.sort(function (a, b) {
                     if (a.npc_kills < b.npc_kills) {
-                        return -1;
+                        return 1;
                     }
                     else if (a.npc_kills > b.npc_kills) {
-                        return 1;
+                        return -1;
                     }
                     return 0;
                 });
