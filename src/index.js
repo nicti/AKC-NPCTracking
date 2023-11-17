@@ -72,7 +72,7 @@ if (fs.existsSync('.etag')) {
     etag = fs.readFileSync('.etag').toString();
 }
 axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { headers: { 'If-None-Match': etag } }).then(function (response) { return __awaiter(void 0, void 0, void 0, function () {
-    var oldData, newData, systems, data, _loop_1, i, hook, embed, ids, i, dat, limitedIds, i, idData, text, _loop_2, i, hookLimited, embedLimited, tmp, _loop_3, i;
+    var oldData, newData, systems, data, _loop_1, i, hook, embed, ids, i, dat, limitedIds, deltaSystemIds, i, idData, text, data1Sorted, _loop_2, i, limitedIds2, deltaSystemIds2, i, text2, data2Sorted, _loop_3, i, hookLimited, embedLimited, tmp, _loop_4, i;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -81,7 +81,10 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 if (fs.existsSync('history.json')) {
                     oldData = JSON.parse(fs.readFileSync('history.json').toString());
                 }
-                systems = process.env.SYSTEM_IDS.split(',');
+                systems = process.env.DELTA_SYSTEM_IDS.split(',')
+                    .concat(process.env.DELTA_SYSTEM_IDS.split(','))
+                    .concat(process.env.KILL_SYSTEM_IDS.split(','));
+                systems = Array.from(new Set(systems));
                 data = [];
                 _loop_1 = function (i) {
                     var system = parseInt(systems[i]);
@@ -105,10 +108,11 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 for (i = 0; i < systems.length; i++) {
                     _loop_1(i);
                 }
+                // Store data
                 fs.rmSync('history.json');
                 fs.writeFileSync('history.json', JSON.stringify(response.data));
                 fs.writeFileSync('.etag', response.headers.etag);
-                hook = new discord_webhook_node_1.Webhook(process.env.WEBHOOK);
+                hook = new discord_webhook_node_1.Webhook(process.env.DELTA_WEBHOOK);
                 embed = new discord_webhook_node_1.MessageBuilder()
                     .setTitle('NPC Delta Report')
                     .setFooter(response.headers["last-modified"]);
@@ -117,17 +121,31 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                     dat = data[i];
                     ids.push(dat.id);
                 }
-                limitedIds = process.env.SYSTEM_IDS_LIMITED.split(',');
+                limitedIds = process.env.DELTA_SYSTEM_IDS.split(',');
+                deltaSystemIds = [];
                 for (i = 0; i < limitedIds.length; i++) {
-                    ids.push(parseInt(limitedIds[i]));
+                    deltaSystemIds.push(parseInt(limitedIds[i]));
                 }
                 ids = Array.from(new Set(ids));
                 return [4 /*yield*/, axios_1.default.post('https://esi.evetech.net/v3/universe/names/', ids)];
             case 1:
                 idData = (_a.sent()).data;
                 text = '```diff';
+                data1Sorted = data.sort(function (a, b) {
+                    if (a.delta < b.delta) {
+                        return -1;
+                    }
+                    else if (a.delta > b.delta) {
+                        return 1;
+                    }
+                    return 0;
+                });
                 _loop_2 = function (i) {
                     var dat = data[i];
+                    if (!deltaSystemIds.includes(dat.id))
+                        return "continue";
+                    if (dat.delta <= 0)
+                        return "continue";
                     var delta = dat.delta.toString();
                     var prefix = '-';
                     if (!delta.startsWith("-")) {
@@ -141,25 +159,79 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                     }
                     text = "".concat(text, "\n").concat(prefix, " ").concat((idData.find(function (e) { return e.id === dat.id; }).name), " => ").concat(dat.npc_kills.toString().padStart(4, ' '), " (").concat(delta.toString().padStart(4, ' '), ")");
                 };
-                for (i = 0; i < data.length; i++) {
+                for (i = 0; i < data1Sorted.length; i++) {
                     _loop_2(i);
                 }
                 text = "".concat(text, "```");
-                console.log(text.length);
+                if (text === '```diff```') {
+                    text = 'No positive deltas!';
+                }
                 embed.setDescription(text);
                 hook.send(embed);
-                hookLimited = new discord_webhook_node_1.Webhook(process.env.WEBHOOK_LIMITER);
+                limitedIds2 = process.env.DELTA_SYSTEM_IDS2.split(',');
+                deltaSystemIds2 = [];
+                for (i = 0; i < limitedIds.length; i++) {
+                    deltaSystemIds2.push(parseInt(limitedIds2[i]));
+                }
+                text2 = '```diff';
+                data2Sorted = data.sort(function (a, b) {
+                    if (a.delta < b.delta) {
+                        return -1;
+                    }
+                    else if (a.delta > b.delta) {
+                        return 1;
+                    }
+                    return 0;
+                });
+                _loop_3 = function (i) {
+                    var dat = data[i];
+                    if (!deltaSystemIds.includes(dat.id))
+                        return "continue";
+                    if (dat.delta <= 0)
+                        return "continue";
+                    var delta = dat.delta.toString();
+                    var prefix = '-';
+                    if (!delta.startsWith("-")) {
+                        delta = "+".concat(delta);
+                        if (dat.delta == 0) {
+                            prefix = ' ';
+                        }
+                        else {
+                            prefix = '+';
+                        }
+                    }
+                    text2 = "".concat(text2, "\n").concat(prefix, " ").concat((idData.find(function (e) { return e.id === dat.id; }).name), " => ").concat(dat.npc_kills.toString().padStart(4, ' '), " (").concat(delta.toString().padStart(4, ' '), ")");
+                };
+                for (i = 0; i < data2Sorted.length; i++) {
+                    _loop_3(i);
+                }
+                text2 = "".concat(text2, "```");
+                if (text2 === '```diff```') {
+                    text2 = 'No positive deltas!';
+                }
+                embed.setDescription(text2);
+                hook.send(embed);
+                hookLimited = new discord_webhook_node_1.Webhook(process.env.KILL_WEBHOOK);
                 embedLimited = new discord_webhook_node_1.MessageBuilder()
                     .setTitle('NPC Kill Report')
                     .setFooter(response.headers["last-modified"]);
-                tmp = newData.filter(function (e) { return limitedIds.includes(e.system_id.toString()) && e.npc_kills >= parseInt(process.env.LIMITER_LIMIT); });
+                tmp = newData.filter(function (e) { return limitedIds.includes(e.system_id.toString()) && e.npc_kills >= parseInt(process.env.KILL_LIMIT); });
                 text = "```";
-                _loop_3 = function (i) {
+                tmp = tmp.sort(function (a, b) {
+                    if (a.npc_kills < b.npc_kills) {
+                        return -1;
+                    }
+                    else if (a.npc_kills > b.npc_kills) {
+                        return 1;
+                    }
+                    return 0;
+                });
+                _loop_4 = function (i) {
                     var system = tmp[i];
                     text = "".concat(text, "\n ").concat((idData.find(function (e) { return e.id === system.system_id; }).name), " => ").concat(system.npc_kills.toString().padStart(4, ' '));
                 };
                 for (i = 0; i < tmp.length; i++) {
-                    _loop_3(i);
+                    _loop_4(i);
                 }
                 text = "".concat(text, "```");
                 embedLimited.setDescription(text);
