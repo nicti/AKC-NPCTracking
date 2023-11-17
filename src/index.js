@@ -185,7 +185,7 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 });
                 _loop_3 = function (i) {
                     var dat = data2Sorted[i];
-                    if (!deltaSystemIds.includes(dat.id))
+                    if (!deltaSystemIds2.includes(dat.id))
                         return "continue";
                     if (dat.delta <= 0)
                         return "continue";

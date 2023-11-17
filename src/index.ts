@@ -119,7 +119,7 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     })
     for (let i = 0; i < data2Sorted.length; i++) {
         let dat = data2Sorted[i]
-        if (!deltaSystemIds.includes(dat.id)) continue;
+        if (!deltaSystemIds2.includes(dat.id)) continue;
         if (dat.delta <= 0) continue;
         let delta = dat.delta.toString()
         let prefix = '-'
