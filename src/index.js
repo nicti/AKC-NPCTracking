@@ -215,7 +215,7 @@ axios_1.default.get('https://esi.evetech.net/v2/universe/system_kills/', { heade
                 embedLimited = new discord_webhook_node_1.MessageBuilder()
                     .setTitle('NPC Kill Report')
                     .setFooter(response.headers["last-modified"]);
-                tmp = newData.filter(function (e) { return limitedIds.includes(e.system_id.toString()) && e.npc_kills >= parseInt(process.env.KILL_LIMIT); });
+                tmp = newData.filter(function (e) { return ids.includes(e.system_id) && e.npc_kills >= parseInt(process.env.KILL_LIMIT); });
                 text = "```";
                 tmp = tmp.sort(function (a, b) {
                     if (a.npc_kills < b.npc_kills) {

@@ -55,7 +55,7 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
     const embed = new MessageBuilder()
         .setTitle('NPC Delta Report')
         .setFooter(response.headers["last-modified"])
-    let ids = []
+    let ids:number[] = []
     for (let i = 0; i < data.length; i++) {
         let dat = data[i]
         ids.push(dat.id)
@@ -146,7 +146,7 @@ axios.get('https://esi.evetech.net/v2/universe/system_kills/', {headers: {'If-No
         .setTitle('NPC Kill Report')
         .setFooter(response.headers["last-modified"])
 
-    let tmp: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }[]|undefined = newData.filter((e: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }) => limitedIds.includes(e.system_id.toString()) && e.npc_kills >= parseInt(process.env.KILL_LIMIT as string))
+    let tmp: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }[]|undefined = newData.filter((e: { npc_kills: number, pod_kills: number, ship_kills: number, system_id: number }) => ids.includes(e.system_id) && e.npc_kills >= parseInt(process.env.KILL_LIMIT as string))
     text = "```"
     tmp = tmp.sort((a, b) => {
         if (a.npc_kills < b.npc_kills) {
